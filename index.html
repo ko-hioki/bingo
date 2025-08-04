@@ -37,7 +37,7 @@
 
             <!-- 現在の抽選番号表示エリア -->
             <div class="bg-gray-100 rounded-2xl p-8 mb-8 border-4 border-dashed border-gray-300">
-                <div id="current-number" class="main-number text-indigo-800">--</div>
+                <div id="current-number" class="main-number text-indigo-800 transition-all duration-100 ease-linear">--</div>
                 <p id="message-area" class="mt-4 text-lg text-gray-600"></p>
             </div>
             
@@ -172,24 +172,38 @@
                 return;
             }
 
-            let newNumber;
-            do {
-                newNumber = Math.floor(Math.random() * BINGO_RANGE) + 1;
-            } while (drawnNumbers.includes(newNumber));
+            drawButton.disabled = true; // 抽選中はボタンを無効化
+            let shuffleCount = 0;
+            const shuffleInterval = setInterval(() => {
+                // シャッフルアニメーション
+                const randomNumber = Math.floor(Math.random() * BINGO_RANGE) + 1;
+                currentNumberEl.textContent = `${getBingoLetter(randomNumber)}-${randomNumber}`;
+                shuffleCount++;
+                
+                // 適切な回数シャッフルされたらアニメーションを停止
+                if (shuffleCount >= 14) { // 700ms / 50ms = 14回
+                    clearInterval(shuffleInterval);
+                    
+                    let newNumber;
+                    do {
+                        newNumber = Math.floor(Math.random() * BINGO_RANGE) + 1;
+                    } while (drawnNumbers.includes(newNumber));
 
-            drawnNumbers.push(newNumber);
-            
-            currentNumberEl.textContent = `${getBingoLetter(newNumber)}-${newNumber}`;
-            messageArea.textContent = '';
-            
-            updateBingoCardGrid();
-            
-            saveState();
+                    drawnNumbers.push(newNumber);
+                    
+                    currentNumberEl.textContent = `${getBingoLetter(newNumber)}-${newNumber}`;
+                    messageArea.textContent = '';
+                    
+                    updateBingoCardGrid();
+                    saveState();
+                    drawButton.disabled = false; // ボタンを有効化
 
-            if (drawnNumbers.length >= BINGO_RANGE) {
-                drawButton.disabled = true;
-                messageArea.textContent = '抽選が終了しました！';
-            }
+                    if (drawnNumbers.length >= BINGO_RANGE) {
+                        drawButton.disabled = true;
+                        messageArea.textContent = '抽選が終了しました！';
+                    }
+                }
+            }, 50); // 50ミリ秒ごとに数字を更新
         }
 
         /**
