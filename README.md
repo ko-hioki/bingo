@@ -1,0 +1,2 @@
+# bingo
+Bingoの抽選
